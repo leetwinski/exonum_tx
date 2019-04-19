@@ -31,6 +31,8 @@ const ERROR_SENDER_SAME_AS_RECEIVER: u8 = 0;
 
 const ERROR_THIRD_PARTY_SAME_AS_SENDER_OR_RECEIVER: u8 = 1;
 
+const ERROR_UNEXPECTED_THIRD_PARTY: u8 = 2;
+
 /// Error codes emitted by wallet transactions during execution.
 #[derive(Debug, Fail)]
 #[repr(u8)]
@@ -85,6 +87,8 @@ impl From<Error> for ExecutionError {
 pub struct Transfer {
     /// `PublicKey` of receiver's wallet.
     pub to: PublicKey,
+    /// `PublicKey` of approver's wallet.
+    pub approver: PublicKey,
     /// Amount of currency to transfer.
     pub amount: u64,
     /// Auxiliary number to guarantee [non-idempotence][idempotence] of transactions.
@@ -173,12 +177,13 @@ impl Transfer {
     pub fn sign(
         pk: &PublicKey,
         &to: &PublicKey,
+        &approver: &PublicKey,
         amount: u64,
         seed: u64,
         sk: &SecretKey,
     ) -> Signed<RawTransaction> {
         Message::sign_transaction(
-            Self { to, amount, seed },
+            Self { to, amount, approver, seed },
             CRYPTOCURRENCY_SERVICE_ID,
             *pk,
             sk,
@@ -194,7 +199,12 @@ impl Transaction for Transfer {
         let mut schema = Schema::new(context.fork());
 
         let to = &self.to;
+        let approver = &self.approver;
         let amount = self.amount;
+
+        if from == approver || to == approver {
+            return Err(ExecutionError::new(ERROR_THIRD_PARTY_SAME_AS_SENDER_OR_RECEIVER))
+        }
 
         if from == to {
             return Err(ExecutionError::new(ERROR_SENDER_SAME_AS_RECEIVER));
@@ -211,7 +221,7 @@ impl Transaction for Transfer {
         }
 
         schema.decrease_wallet_balance(sender, amount, &hash);
-        schema.create_pending_transfer(hash, from, to, amount);
+        schema.create_pending_transfer(hash, from, to, approver, amount);
 
         Ok(())
     }
@@ -225,6 +235,10 @@ impl Transaction for ConfirmTransfer {
         let mut schema = Schema::new(context.fork());
 
         if let Some(pending_transfer) = schema.pending_transfer(&self.tx_hash) {
+            if pending_transfer.approver != *approver {
+                return Err(ExecutionError::new(ERROR_UNEXPECTED_THIRD_PARTY))
+            }
+            
             if pending_transfer.fulfilled {
                 Err(Error::PendingTransferAlreadyFulfilled)?
             }
@@ -232,24 +246,20 @@ impl Transaction for ConfirmTransfer {
             let from = &pending_transfer.from;
             let to = &pending_transfer.to;
 
-            if from == approver || to == approver {
-                Err(ExecutionError::new(ERROR_THIRD_PARTY_SAME_AS_SENDER_OR_RECEIVER))
-            } else {
-                let sender = schema.wallet(from).ok_or(Error::SenderNotFound)?;
-                let receiver = schema.wallet(to).ok_or(Error::ReceiverNotFound)?;
+            let sender = schema.wallet(from).ok_or(Error::SenderNotFound)?;
+            let receiver = schema.wallet(to).ok_or(Error::ReceiverNotFound)?;
 
-                let amount = pending_transfer.amount;
+            let amount = pending_transfer.amount;
 
-                if sender.frozen_amount < amount {
-                    Err(Error::InsufficientCurrencyAmount)?
-                }
-
-                schema.decrease_wallet_frozen_balance(sender, amount, &hash);
-                schema.increase_wallet_balance(receiver, amount, &hash);
-                schema.fulfill_pending_transfer(pending_transfer);
-                
-                Ok(())
+            if sender.frozen_amount < amount {
+                Err(Error::InsufficientCurrencyAmount)?
             }
+
+            schema.decrease_wallet_frozen_balance(sender, amount, &hash);
+            schema.increase_wallet_balance(receiver, amount, &hash);
+            schema.fulfill_pending_transfer(pending_transfer);
+            
+            Ok(())
         } else {
             Err(Error::PendingTransferNotFound)?
         }

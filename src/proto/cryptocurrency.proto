@@ -22,10 +22,12 @@ import "helpers.proto";
 message Transfer {
   // `PublicKey` of receiver's wallet.
   exonum.PublicKey to = 1;
+  // `PublicKey` of the tx approver
+  exonum.PublicKey approver = 2;
   // Amount of currency to transfer.
-  uint64 amount = 2;
+  uint64 amount = 3;
   // Auxiliary number to guarantee non-idempotence of transactions.
-  uint64 seed = 3;
+  uint64 seed = 4;
 }
 
 // Issue `amount` of the currency to the `wallet`.
@@ -52,8 +54,9 @@ message PendingTransfer {
   exonum.Hash tx_hash = 1;
   exonum.PublicKey from = 2;
   exonum.PublicKey to = 3;
-  uint64 amount = 4;
-  bool fulfilled = 5;
+  exonum.PublicKey approver = 4;
+  uint64 amount = 5;
+  bool fulfilled = 6;
 }
 
 // Wallet information stored in the database.

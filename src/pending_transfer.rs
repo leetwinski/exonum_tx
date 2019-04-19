@@ -14,6 +14,8 @@ pub struct PendingTransfer {
     pub from: PublicKey,
     /// receiver public key
     pub to: PublicKey,
+    /// approver public key
+    pub approver: PublicKey,    
     /// transferred amount
     pub amount: u64,
     /// transfer is fulfilled
@@ -26,6 +28,7 @@ impl PendingTransfer {
         tx_hash: Hash,
         &from: &PublicKey,
         &to: &PublicKey,
+        &approver: &PublicKey,
         amount: u64,
         fulfilled: bool,
     ) -> Self {
@@ -33,6 +36,7 @@ impl PendingTransfer {
             tx_hash,
             from,
             to,
+            approver,
             amount,
             fulfilled,
         }

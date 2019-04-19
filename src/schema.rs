@@ -146,8 +146,8 @@ impl<'a> Schema<&'a mut Fork> {
     }
 
     /// Create new pending transfer
-    pub fn create_pending_transfer(&mut self, tx_hash: Hash, from: &PublicKey, to: &PublicKey, amount: u64) {
-        self.pending_transfers_mut().put(&tx_hash, PendingTransfer::new(tx_hash, from, to, amount, false));
+    pub fn create_pending_transfer(&mut self, tx_hash: Hash, from: &PublicKey, to: &PublicKey, approver: &PublicKey, amount: u64) {
+        self.pending_transfers_mut().put(&tx_hash, PendingTransfer::new(tx_hash, from, to, approver, amount, false));
     }
 
     /// Create new wallet and append first record to its history.
