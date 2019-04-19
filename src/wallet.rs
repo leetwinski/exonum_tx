@@ -27,7 +27,7 @@ pub struct Wallet {
     /// Name of the wallet.
     pub name: String,
     /// Current balance of the wallet.
-    pub balance: u64,
+    pub balance: i64,
     /// Length of the transactions history.
     pub history_len: u64,
     /// `Hash` of the transactions history.
@@ -41,7 +41,7 @@ impl Wallet {
     pub fn new(
         &pub_key: &PublicKey,
         name: &str,
-        balance: u64,
+        balance: i64,
         history_len: u64,
         &history_hash: &Hash,
         frozen_amount: u64
@@ -56,7 +56,7 @@ impl Wallet {
         }
     }
     /// Returns a copy of this wallet with updated balance.
-    pub fn set_balance(self, balance: u64, history_hash: &Hash) -> Self {
+    pub fn set_balance(self, balance: i64, history_hash: &Hash) -> Self {
         Self::new(
             &self.pub_key,
             &self.name,

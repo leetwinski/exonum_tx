@@ -102,7 +102,7 @@ impl<'a> Schema<&'a mut Fork> {
             history.push(*transaction);
             let history_hash = history.merkle_root();
             let balance = wallet.balance;
-            wallet.set_balance(balance + amount, &history_hash)
+            wallet.set_balance(balance + (amount as i64), &history_hash)
         };
         self.wallets_mut().put(&wallet.pub_key, wallet.clone());
     }
@@ -118,7 +118,7 @@ impl<'a> Schema<&'a mut Fork> {
             let balance = wallet.balance;
             let frozen = wallet.frozen_amount;
             wallet
-                .set_balance(balance - amount, &history_hash)
+                .set_balance(balance - (amount as i64), &history_hash)
                 .set_frozen_amount(frozen + amount, &history_hash)
         };
         self.wallets_mut().put(&wallet.pub_key, wallet.clone());

@@ -66,7 +66,7 @@ message Wallet {
   // Name of the wallet.
   string name = 2;
   // Current balance of the wallet.
-  uint64 balance = 3;
+  int64 balance = 3;
   // Length of the transactions history.
   uint64 history_len = 4;
   // `Hash` of the transactions history.

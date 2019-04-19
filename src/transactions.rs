@@ -223,7 +223,7 @@ impl Transaction for Transfer {
 
         // considering frozen_amount to still be awailable for withdrawal,
         // since it can be left unconfirmed
-        if sender.balance + sender.frozen_amount < amount {
+        if sender.balance + (sender.frozen_amount as i64) < (amount as i64) {
             Err(Error::InsufficientCurrencyAmount)?
         }
 
@@ -258,7 +258,9 @@ impl Transaction for ConfirmTransfer {
 
             let amount = pending_transfer.amount;
 
-            if sender.frozen_amount < amount {
+            // handling withdrawal amount which is greater than frozen amount
+            // and also the situation when the frozen balance is greater than initial balance
+            if sender.frozen_amount < amount || (sender.frozen_amount as i64) + sender.balance < (amount as i64) {
                 Err(Error::InsufficientCurrencyAmount)?
             }
 
