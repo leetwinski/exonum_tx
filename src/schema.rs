@@ -52,12 +52,12 @@ where
         ProofListIndex::new_in_family("cryptocurrency.wallet_history", public_key, &self.view)
     }
 
-    /// TODO
+    /// Returns `ProofMapIndex` with pending transfers.
     pub fn pending_transfers(&self) -> ProofMapIndex<&T, Hash, PendingTransfer> {
         ProofMapIndex::new("cryptocurrency.pending_transfers", &self.view)
     }
 
-    /// TODO
+    /// Returns pending transfer for the transfer transaction hash.
     pub fn pending_transfer(&self, hash: &Hash) -> Option<PendingTransfer> {
         self.pending_transfers().get(hash)
     }
@@ -80,7 +80,7 @@ impl<'a> Schema<&'a mut Fork> {
         ProofMapIndex::new("cryptocurrency.wallets", &mut self.view)
     }
 
-    /// TODO
+    /// Returns mutable `ProofMapIndex` with pending transfers.
     pub fn pending_transfers_mut(&mut self) -> ProofMapIndex<&mut Fork, Hash, PendingTransfer> {
         ProofMapIndex::new("cryptocurrency.pending_transfers", self.view)
     }

@@ -1,18 +1,3 @@
-// Copyright 2019 The Exonum Team
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//   http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
-// TODO
 //! pending transfer.
 
 use exonum::crypto::{Hash, PublicKey};
@@ -23,15 +8,15 @@ use super::proto;
 #[derive(Clone, Debug, ProtobufConvert)]
 #[exonum(pb = "proto::PendingTransfer", serde_pb_convert)]
 pub struct PendingTransfer {
-    /// TODO
+    /// hash of the transfer to be confirmed
     pub tx_hash: Hash,
-    /// TODO
+    /// sender public key
     pub from: PublicKey,
-    /// TODO    
+    /// receiver public key
     pub to: PublicKey,
-    /// TODO    
+    /// transferred amount
     pub amount: u64,
-    /// TODO    
+    /// transfer is fulfilled
     pub fulfilled: bool,
 }
 

@@ -42,7 +42,6 @@ message CreateWallet {
   string name = 1;
 }
 
-// TODO
 // Confirm `transfer` with third-party public key
 message ConfirmTransfer {  
   exonum.Hash tx_hash = 1;
