@@ -71,7 +71,13 @@ pub enum Error {
     ///
     /// Can be emitted by `ConfirmTransfer`
     #[fail(display = "Pending transfer has already been fulfilled")]    
-    PendingTransferAlreadyFulfilled = 5,    
+    PendingTransferAlreadyFulfilled = 5,
+
+    /// Approver doesn't exist.
+    ///
+    /// Can be emitted by `Transfer`.
+    #[fail(display = "Approver doesn't exist")]
+    ApproverNotFound = 6,    
 }
 
 impl From<Error> for ExecutionError {
@@ -210,6 +216,7 @@ impl Transaction for Transfer {
             return Err(ExecutionError::new(ERROR_SENDER_SAME_AS_RECEIVER));
         }
 
+        schema.wallet(approver).ok_or(Error::ApproverNotFound)?;
         let sender = schema.wallet(from).ok_or(Error::SenderNotFound)?;
 
         schema.wallet(to).ok_or(Error::ReceiverNotFound)?;
