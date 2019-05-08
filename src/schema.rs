@@ -69,7 +69,7 @@ where
 
     /// Returns the state hash of cryptocurrency service.
     pub fn state_hash(&self) -> Vec<Hash> {
-        vec![self.wallets().merkle_root()]
+        vec![self.wallets().merkle_root(), self.pending_transfers().merkle_root()]
     }
 }
 

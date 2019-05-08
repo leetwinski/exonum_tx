@@ -234,6 +234,13 @@ impl Transaction for Transfer {
     }
 }
 
+/// checking if withdrawal can be confirmed.
+/// handling withdrawal amount which is greater than frozen amount
+/// and also the situation when the frozen balance is greater than initial balance
+pub fn can_confirm_withdrawal(balance: i64, frozen: u64, amount: u64) -> bool {
+    frozen >= amount && (frozen as i64) + balance >= (amount as i64)
+}
+
 impl Transaction for ConfirmTransfer {
     fn execute(&self, mut context: TransactionContext) -> ExecutionResult {
         let approver = &context.author();
@@ -258,10 +265,8 @@ impl Transaction for ConfirmTransfer {
 
             let amount = pending_transfer.amount;
 
-            // handling withdrawal amount which is greater than frozen amount
-            // and also the situation when the frozen balance is greater than initial balance
-            if sender.frozen_amount < amount || (sender.frozen_amount as i64) + sender.balance < (amount as i64) {
-                Err(Error::InsufficientCurrencyAmount)?
+            if !can_confirm_withdrawal(sender.balance, sender.frozen_amount, amount) {
+                Err(Error::InsufficientCurrencyAmount)?                
             }
 
             schema.decrease_wallet_frozen_balance(sender, amount, &hash);
